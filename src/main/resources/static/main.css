@@ -31,12 +31,21 @@ a{
     height:800px;
 }
 .content{
-    background:lightseagreen;
+    background:lightgray;
     width:65%;
     height:800px;
 }
 .searchedResult{
-background:limegreen;
+    display: inline-block;
+    background:limegreen;
     width:10%;
     height:800px;
+}
+.searchedResult ul.pagination {
+    display: inline-block;
+}
+
+.searchedResult ul.pagination li {
+    display: inline;
+    margin-right: 1px; /* 숫자와 버튼 사이 여백 조절 */
 }

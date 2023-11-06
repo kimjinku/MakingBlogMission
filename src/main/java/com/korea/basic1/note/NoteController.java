@@ -6,6 +6,9 @@ import com.korea.basic1.postService.PostRepository;
 import com.korea.basic1.user.SiteUser;
 import com.korea.basic1.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,12 +32,13 @@ public class NoteController {
     UserService userService;
 
     @RequestMapping("/note")
-    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword) {
+    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value="page", defaultValue="0") int page) {
         List<Post> postList = postRepository.findAll();
         List<Note> noteList = noteRepository.findAll();
         List<Post> postListForNote = noteList.get(0).getPosts();
+        pageable=PageRequest.of(page,10);
         if (keyword != null && !keyword.isEmpty()) {
-            List<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword);
+            Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword,pageable);
             model.addAttribute("searchResults", searchResults);
         } else {
             model.addAttribute("searchResults", Collections.emptyList()); // 빈 결과를 전달
@@ -63,12 +67,13 @@ public class NoteController {
     }
 
     @GetMapping("/noteDetail/{noteId}/{postId}")
-    public String noteDetail(Model model, @PathVariable Long postId, @PathVariable Long noteId, @RequestParam(value = "keyword", defaultValue = "") String keyword) {
+    public String noteDetail(Model model, @PathVariable Long postId, @PathVariable Long noteId, @RequestParam(value = "keyword", defaultValue = "") String keyword,Pageable pageable,@RequestParam(value="page", defaultValue="0") int page) {
         Post post = postRepository.findById(postId).get();
         Note note = noteRepository.findById(noteId).get();
         List<Post> postListForNote = note.getPosts();
+        pageable = PageRequest.of(page, 10);
         if (keyword != null && !keyword.isEmpty()) {
-            List<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword);
+            Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword,pageable);
             model.addAttribute("searchResults", searchResults);
         } else {
             model.addAttribute("searchResults", Collections.emptyList()); // 빈 결과를 전달
