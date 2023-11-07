@@ -25,5 +25,7 @@ public class NoteService {
             throw new RuntimeException("question not found");
         }
     }
-
+    public List<Note> getParentNoteList(){
+        return noteRepository.findByParentNoteNoteId(null);
+    }
 }

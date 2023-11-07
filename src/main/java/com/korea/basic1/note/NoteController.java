@@ -27,18 +27,19 @@ public class NoteController {
     NoteRepository noteRepository;
     @Autowired
     PostController postController;
-
+    @Autowired
+    NoteService noteService;
     @Autowired
     UserService userService;
 
     @RequestMapping("/note")
-    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value="page", defaultValue="0") int page) {
+    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
         List<Post> postList = postRepository.findAll();
-        List<Note> noteList = noteRepository.findAll();
+        List<Note> noteList = noteService.getParentNoteList();
         List<Post> postListForNote = noteList.get(0).getPosts();
-        pageable=PageRequest.of(page,10);
+        pageable = PageRequest.of(page, 10);
         if (keyword != null && !keyword.isEmpty()) {
-            Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword,pageable);
+            Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
             model.addAttribute("searchResults", searchResults);
         } else {
             model.addAttribute("searchResults", Collections.emptyList()); // 빈 결과를 전달
@@ -52,9 +53,10 @@ public class NoteController {
         model.addAttribute("targetNote", noteList.get(0));
         return "main";
     }
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/noteWrite")
-    public String noteWrite(Long noteId, Long postId,Principal principal) {
+    public String noteWrite(Long noteId, Long postId, Principal principal) {
         Note note = new Note();
         List<Post> postList = new ArrayList<>();
         SiteUser siteUser = userService.getUser(principal.getName());
@@ -62,18 +64,18 @@ public class NoteController {
         note.setTitle("새 노트");
         note.setAuthor(siteUser);
         noteRepository.save(note);
-        postController.write(noteRepository.findMaxNoteId(),postId, principal);
+        postController.write(noteRepository.findMaxNoteId(), postId, principal);
         return "redirect:/noteDetail/" + noteId + "/" + postId;
     }
 
     @GetMapping("/noteDetail/{noteId}/{postId}")
-    public String noteDetail(Model model, @PathVariable Long postId, @PathVariable Long noteId, @RequestParam(value = "keyword", defaultValue = "") String keyword,Pageable pageable,@RequestParam(value="page", defaultValue="0") int page) {
+    public String noteDetail(Model model, @PathVariable Long postId, @PathVariable Long noteId, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
         Post post = postRepository.findById(postId).get();
         Note note = noteRepository.findById(noteId).get();
         List<Post> postListForNote = note.getPosts();
         pageable = PageRequest.of(page, 10);
         if (keyword != null && !keyword.isEmpty()) {
-            Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword,pageable);
+            Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
             model.addAttribute("searchResults", searchResults);
         } else {
             model.addAttribute("searchResults", Collections.emptyList()); // 빈 결과를 전달
@@ -83,11 +85,12 @@ public class NoteController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("targetPost", post);
         model.addAttribute("postList", postListForNote);
-        model.addAttribute("noteList", noteRepository.findAll());
+        model.addAttribute("noteList", noteService.getParentNoteList());
         model.addAttribute("targetNote", note);
 
         return "main";
     }
+
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/noteDelete")
     public String noteDelete(Long noteId) {
@@ -95,9 +98,10 @@ public class NoteController {
         noteRepository.delete(note);
         return "redirect:/note";
     }
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/noteUpdate")
-    public String noteUpdate(Long noteId,String title) {
+    public String noteUpdate(Long noteId, String title) {
         Note note = noteRepository.findById(noteId).get();
         note.setTitle(title);
         noteRepository.save(note);

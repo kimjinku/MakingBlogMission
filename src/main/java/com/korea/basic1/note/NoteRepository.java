@@ -11,5 +11,7 @@ public interface NoteRepository extends JpaRepository<Note,Long> {
     @Query("SELECT MAX(n.noteId) FROM Note n")
     Long findMaxNoteId();
     List<Note> findByPosts_TitleContainingOrPosts_ContentContaining(String title, String content);
+
+    List<Note> findByParentNoteNoteId(Note parentNote);
 }
 

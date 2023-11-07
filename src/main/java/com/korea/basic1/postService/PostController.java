@@ -2,8 +2,10 @@ package com.korea.basic1.postService;
 
 import com.korea.basic1.note.Note;
 import com.korea.basic1.note.NoteRepository;
+import com.korea.basic1.note.NoteService;
 import com.korea.basic1.user.SiteUser;
 import com.korea.basic1.user.UserService;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,9 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 //질문사항
-//검색기능 오류
-//확인메시지
-// 마크다운이....?
+//검색기능 고치기
+
 
 @Controller
 public class PostController {
@@ -32,11 +33,13 @@ public class PostController {
 
     @Autowired
     UserService userService;
+    @Autowired
+    NoteService noteService;
 
     @RequestMapping("/")
     public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
         List<Post> postList = postRepository.findAll();
-        List<Note> noteList = noteRepository.findAll();
+        List<Note> noteList = noteService.getParentNoteList();
         List<Post> postListForNote = noteList.get(0).getPosts();
         pageable = PageRequest.of(page, 10);
         if (keyword != null && !keyword.isEmpty()) {
@@ -87,7 +90,7 @@ public class PostController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("targetPost", post);
         model.addAttribute("postList", postListForNote);
-        model.addAttribute("noteList", noteRepository.findAll());
+        model.addAttribute("noteList", noteService.getParentNoteList());
         model.addAttribute("targetNote", note);
 
         return "main";
@@ -117,7 +120,7 @@ public class PostController {
     @GetMapping("/search")
     public String searchPosts(@RequestParam(value = "keyword", defaultValue = "") String keyword, Model model, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
         List<Post> postList = postRepository.findAll();
-        List<Note> noteList = noteRepository.findAll();
+        List<Note> noteList = noteService.getParentNoteList();
         pageable = PageRequest.of(page, 10);
         Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
         model.addAttribute("searchResults", searchResults);

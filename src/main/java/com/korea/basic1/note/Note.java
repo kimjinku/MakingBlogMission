@@ -21,6 +21,10 @@ public class Note {
     private List<Post> posts;
     @ManyToOne
     private SiteUser author;
+    @ManyToOne
+    private Note parentNote;
 
+    @OneToMany(mappedBy = "parentNote")  // 자식 노트 목록을 가리킴
+    private List<Note> childNotes;
 
 }
