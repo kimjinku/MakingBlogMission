@@ -28,30 +28,41 @@
         <div class="note-List">
             <div style="overflow: scroll; height: 800px;">
                 <ul>
-<!--                    <div th:each="note:${noteList}" th:unless="${note.parentNote!=null}" th:text="${note.noteId+'_'+note.title}"></div>-->
-<!--                    <div th:each="note:${noteList}" th:if="${note.parentNote!=null}" th:text="${note.noteId+'_'+note.title+'_'+note.parentNote.noteId}"></div>-->
                     <ul class="menu">
-                        <li th:each="note:${noteList}" th:class="${#lists.isEmpty(note.childNotes) and note.noteId==targetNote.noteId} ? 'selected-item':''">
-                            <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:if="${#lists.isEmpty(note.childNotes)}" th:text="${note.title}"></a>
-                            <details th:unless="${#lists.isEmpty(note.childNotes)}">
-                                <summary th:text="${note.title}"></summary>
-                                <ul>
-                                    <li th:each="childNote:${note.childNotes}" th:class="${childNote.noteId==targetNote.noteId} ? 'selected-item':''">
-                                        <a th:href="@{|/noteDetail/${childNote.noteId}/${targetPost.postId}|}" th:text="${childNote.title}"></a>
-                                    </li>
-                                </ul>
-                            </details>
-                        </li>
+                        <li th:replace="~{/fragments :: tree(${targetNote},${noteList})}"></li>
+<!--                        <li th:each="note:${noteList}"  th:class="${note.noteId==targetNote.noteId and #lists.isEmpty(note.childNotes)} ? 'selected-item':''">-->
+<!--                            <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:if="${#lists.isEmpty(note.childNotes)}" th:text="${note.title}"></a>-->
+<!--                            &lt;!&ndash;하위노트가 없는 상위노트  a링크&ndash;&gt;-->
+<!--                            <details th:unless="${#lists.isEmpty(note.childNotes)}">-->
+<!--&lt;!&ndash;                                <th:block th:each="childNote : ${note.childNotes}">&ndash;&gt;-->
+<!--                                <summary th:class="${note.noteId==targetNote.noteId || #lists.contains(note.childNotes, targetNote)} ? 'selected-item':''">-->
+<!--                                    <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:text="${note.title}"></a>-->
+<!--                                    &lt;!&ndash;하위노트가 있는 상위노트 a링크&ndash;&gt;-->
+<!--                                </summary>-->
+<!--&lt;!&ndash;                                </th:block>&ndash;&gt;-->
+<!--                                <ul>-->
+<!--                                    <li th:each="childNote:${note.childNotes}"  th:class="${childNote.noteId==targetNote.noteId} ? 'selected-item':''">-->
+<!--                                        <a th:href="@{|/noteDetail/${childNote.noteId}/${targetPost.postId}|}" th:text="${childNote.title}"></a>-->
+<!--&lt;!&ndash;                                        하위노트의 a링크&ndash;&gt;-->
+<!--                                    </li>-->
+<!--                                </ul>-->
+<!--                            </details>-->
+<!--                        </li>-->
                     </ul>
-<!--                    <li th:each="note:${noteList}" th:class="${note.noteId==targetNote.noteId} ? 'selected-item':''">-->
-<!--                        <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:text="${note.title}"></a>-->
-<!--                    </li>-->
+
                     <form th:action="@{/noteWrite}" method="post">
                         <div>
                             <input type="hidden" name="noteId" th:value="${targetNote.noteId}">
                             <input type="hidden" name="postId" th:value="${targetPost.postId}">
                         </div>
                         <input type="submit" value="노트추가">
+                    </form>
+                    <form th:action="@{/noteGroupWrite}" method="post">
+                        <div>
+                            <input type="hidden" name="noteId" th:value="${targetNote.noteId}">
+                            <input type="hidden" name="postId" th:value="${targetPost.postId}">
+                        </div>
+                        <input type="submit" value="하위노트추가">
                     </form>
                     <div>
                         <form action="/noteDelete" method="get" onsubmit="return confirmDelete();">

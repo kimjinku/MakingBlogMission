@@ -51,6 +51,7 @@ public class NoteController {
         model.addAttribute("targetPost", postList.get(0));
         model.addAttribute("noteList", noteList);
         model.addAttribute("targetNote", noteList.get(0));
+        model.addAttribute("parentNoteId", noteList.get(0).getNoteId());
         return "main";
     }
 
@@ -87,6 +88,11 @@ public class NoteController {
         model.addAttribute("postList", postListForNote);
         model.addAttribute("noteList", noteService.getParentNoteList());
         model.addAttribute("targetNote", note);
+        if (note.getParentNote() != null) {
+            model.addAttribute("parentNoteId", note.getParentNote().getNoteId());
+        } else {
+            model.addAttribute("parentNoteId", note.getNoteId());
+        }
 
         return "main";
     }
@@ -106,5 +112,18 @@ public class NoteController {
         note.setTitle(title);
         noteRepository.save(note);
         return ("redirect:/note");
+    }
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/noteGroupWrite")
+    public String noteGroupWrite(Long noteId,Principal principal){
+        Note note = new Note();
+        List<Post> postList = new ArrayList<>();
+        SiteUser siteUser = userService.getUser(principal.getName());
+        note.setPosts(postList);
+        note.setTitle("새 하위노트");
+        note.setAuthor(siteUser);
+        note.setParentNote(noteRepository.findById(noteId).get());
+        noteRepository.save(note);
+        return "redirect:/note";
     }
 }

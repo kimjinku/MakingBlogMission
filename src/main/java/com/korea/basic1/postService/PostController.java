@@ -55,6 +55,7 @@ public class PostController {
         model.addAttribute("targetPost", postList.get(0));
         model.addAttribute("noteList", noteList);
         model.addAttribute("targetNote", noteList.get(0));
+        model.addAttribute("parentNoteId", noteList.get(0).getNoteId());
         return "main";
     }
 
@@ -92,6 +93,11 @@ public class PostController {
         model.addAttribute("postList", postListForNote);
         model.addAttribute("noteList", noteService.getParentNoteList());
         model.addAttribute("targetNote", note);
+        if (note.getParentNote() != null) {
+            model.addAttribute("parentNoteId", note.getParentNote().getNoteId());
+        } else {
+            model.addAttribute("parentNoteId", note.getNoteId());
+        }
 
         return "main";
     }
@@ -132,6 +138,7 @@ public class PostController {
         model.addAttribute("targetPost", postList.get(0));
         model.addAttribute("noteList", noteList);
         model.addAttribute("targetNote", noteList.get(0));
+        model.addAttribute("parentNoteId", noteList.get(0).getNoteId());
 
         return "main";
     }
