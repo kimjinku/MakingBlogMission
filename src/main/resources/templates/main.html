@@ -93,6 +93,11 @@
                         </div>
                         <input type="submit" value="추가">
                     </form>
+                    <form th:action="@{|/detail/${targetNote.noteId}/${targetPost.postId}|}" method="get">
+                        <button type="submit" name="sortBy" value="createDate">생성날짜로 정렬</button>
+                        <button type="submit" name="sortBy" value="modifyDate">수정날짜로 정렬</button>
+                        <button type="submit" name="sortBy" value="title">제목으로 정렬</button>
+                    </form>
                 </ul>
                 <!-- 페이징처리 시작 -->
                 <div th:if="${!postList.isEmpty()}">

@@ -70,7 +70,7 @@ public class PostService {
     }
     public Page<Post> getPageListByTitle(int page,Note note) {
         List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("title"));
+        sorts.add(Sort.Order.asc("title"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
         return this.postRepository.findAllByNote(note,pageable);
     }

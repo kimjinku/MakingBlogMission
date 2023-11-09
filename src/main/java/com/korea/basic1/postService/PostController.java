@@ -44,7 +44,7 @@ public class PostController {
         Page<Post> postList = postRepository.findAll(pageable);
         List<Note> noteList = noteService.getParentNoteList();
         //List<Post> postListForNote = noteList.get(0).getPosts();
-        Page<Post> postListForNote = postRepository.findAllByNote(noteList.get(0),pageable);
+        Page<Post> postListForNote = postService.getPageListByCreateDate(page,noteList.get(0));
         if (keyword != null && !keyword.isEmpty()) {
             Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
             model.addAttribute("searchResults", searchResults);
@@ -78,11 +78,29 @@ public class PostController {
     }
 
     @GetMapping("/detail/{noteId}/{postId}")
-    public String detail(Model model, @PathVariable Long postId, @PathVariable Long noteId, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
+    public String detail(Model model, @PathVariable Long postId, @PathVariable Long noteId, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "sortBy", required = false) String sortBy) {
         pageable = PageRequest.of(page, 10);
         Post post = postRepository.findById(postId).get();
         Note note = noteRepository.findById(noteId).get();
-        Page<Post> postListForNote = postRepository.findAllByNote(note,pageable);//note.getPosts(pageable);
+        Page<Post> postListForNote;
+        if (sortBy == null) {
+            postListForNote = postService.getPageListByCreateDate(page, note);
+        } else {
+            switch (sortBy) {
+                case "createDate":
+                    postListForNote = postService.getPageListByCreateDate(page, note);
+                    break;
+                case "modifyDate":
+                    postListForNote = postService.getPageListByModifyDate(page, note);
+                    break;
+                case "title":
+                    postListForNote = postService.getPageListByTitle(page, note);
+                    break;
+                default:
+                    postListForNote = postService.getPageListByCreateDate(page, note); // 기본 정렬 방식
+            }
+        }
+        //Page<Post> postListForNote= postService.getPageListByCreateDate(page, note);
         if (keyword != null && !keyword.isEmpty()) {
             Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
             model.addAttribute("searchResults", searchResults);
@@ -137,7 +155,7 @@ public class PostController {
         List<Note> searchNoteResults = noteRepository.findByPosts_TitleContainingOrPosts_ContentContaining(keyword, keyword);
         model.addAttribute("searchNoteResults", searchNoteResults);
         //List<Post> postListForNote = noteList.get(0).getPosts();
-        Page<Post> postListForNote = postRepository.findAllByNote(noteList.get(0),pageable);
+        Page<Post> postListForNote = postService.getPageListByCreateDate(page,noteList.get(0));
         model.addAttribute("keyword", keyword);
         model.addAttribute("postList", postListForNote);
         model.addAttribute("targetPost", postList.getContent().get(0));// postList.get(0);

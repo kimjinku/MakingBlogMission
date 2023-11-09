@@ -3,6 +3,7 @@ package com.korea.basic1.note;
 import com.korea.basic1.postService.Post;
 import com.korea.basic1.postService.PostController;
 import com.korea.basic1.postService.PostRepository;
+import com.korea.basic1.postService.PostService;
 import com.korea.basic1.user.SiteUser;
 import com.korea.basic1.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ public class NoteController {
     NoteService noteService;
     @Autowired
     UserService userService;
+    @Autowired
+    PostService postService;
 
     @RequestMapping("/note")
     public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
@@ -38,7 +41,7 @@ public class NoteController {
         Page<Post> postList = postRepository.findAll(pageable);
         List<Note> noteList = noteService.getParentNoteList();
         //List<Post> postListForNote = noteList.get(0).getPosts();
-        Page<Post> postListForNote = postRepository.findAllByNote(noteList.get(0),pageable);
+        Page<Post> postListForNote = postService.getPageListByCreateDate(page,noteList.get(0));
         if (keyword != null && !keyword.isEmpty()) {
             Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
             model.addAttribute("searchResults", searchResults);
@@ -75,7 +78,7 @@ public class NoteController {
         Post post = postRepository.findById(postId).get();
         Note note = noteRepository.findById(noteId).get();
         //List<Post> postListForNote = note.getPosts();
-        Page<Post> postListForNote = postRepository.findAllByNote(note,pageable);
+        Page<Post> postListForNote = postService.getPageListByCreateDate(page,note);
         pageable = PageRequest.of(page, 10);
         if (keyword != null && !keyword.isEmpty()) {
             Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
