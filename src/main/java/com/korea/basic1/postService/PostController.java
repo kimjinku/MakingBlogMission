@@ -108,6 +108,7 @@ public class PostController {
         Post post = postRepository.findById(postId).get();
         post.setTitle(title);
         post.setContent(editorContent);
+        post.setModifyDate(LocalDateTime.now());
         if (post.getTitle().equals("")) {
             post.setTitle("제목없음");
         }

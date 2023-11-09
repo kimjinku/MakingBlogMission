@@ -22,5 +22,6 @@ public class Post {
     private Note note;
     @ManyToOne
     private SiteUser author;
+    private LocalDateTime modifyDate;
 
 }

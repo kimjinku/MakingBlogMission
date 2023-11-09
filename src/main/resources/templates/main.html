@@ -118,7 +118,7 @@
         <div class="searchedResult">
             <ul>
                 <li th:each="post : ${searchResults}">
-                    <a th:href="@{|/noteDetail/${post.note.noteId}/${post.postId}|}" th:text="${post.title}"></a>
+                    <a th:href="@{|/noteDetail/${post.note.noteId}/${post.postId}|}" th:text="${post.note.title+post.title}"></a>
                 </li>
             </ul>
             <!-- 페이징처리 시작 -->
@@ -191,6 +191,28 @@
         // 에디터 내용을 숨겨진 필드에 설정
         editorContent.value = editor.getMarkdown();
     });
+</script>
+<script>
+    function saveOpenList() {
+            let resultList = document.querySelectorAll("details");
+            let openList = [];
+            resultList.forEach(function (item) {
+                if(item.getAttribute("open") != null) {
+                    openList.push(item.getAttribute("id"));
+                }
+            });
+
+            localStorage.setItem("openList", JSON.stringify(openList));
+            console.log("hihi");
+    }
+    const openList = localStorage.getItem("openList");
+
+    if(openList != null) {
+         openListArr = JSON.parse(openList);
+         openListArr.forEach(function (item) {
+             document.getElementById(item).setAttribute("open", true);
+         });
+    }
 </script>
 </body>
 </html>

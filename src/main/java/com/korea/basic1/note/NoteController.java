@@ -66,7 +66,7 @@ public class NoteController {
         note.setAuthor(siteUser);
         noteRepository.save(note);
         postController.write(noteRepository.findMaxNoteId(), postId, principal);
-        return "redirect:/noteDetail/" + noteId + "/" + postId;
+        return "redirect:/noteDetail/" + note.getNoteId() + "/" + postId;
     }
 
     @GetMapping("/noteDetail/{noteId}/{postId}")
@@ -115,7 +115,7 @@ public class NoteController {
     }
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/noteGroupWrite")
-    public String noteGroupWrite(Long noteId,Principal principal){
+    public String noteGroupWrite(Long noteId,Principal principal,Long postId){
         Note note = new Note();
         List<Post> postList = new ArrayList<>();
         SiteUser siteUser = userService.getUser(principal.getName());
@@ -124,6 +124,7 @@ public class NoteController {
         note.setAuthor(siteUser);
         note.setParentNote(noteRepository.findById(noteId).get());
         noteRepository.save(note);
-        return "redirect:/note";
+        postController.write(noteRepository.findMaxNoteId(), postId, principal);
+        return "redirect:/noteDetail/" + note.getNoteId() + "/" + postId;
     }
 }

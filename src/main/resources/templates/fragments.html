@@ -6,12 +6,12 @@
 </head>
 <body>
 <li th:fragment="tree(targetNote,noteList)" th:each="note:${noteList}"  th:class="${note.noteId==targetNote.noteId and #lists.isEmpty(note.childNotes)} ? 'selected-item':''">
-    <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:if="${#lists.isEmpty(note.childNotes)}" th:text="${note.title}"></a>
+    <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:if="${#lists.isEmpty(note.childNotes)}" th:text="${note.title}" onclick="saveOpenList()"></a>
     <!--하위노트가 없는 상위노트  a링크-->
-    <details th:unless="${#lists.isEmpty(note.childNotes)}">
+    <details th:id="${note.noteId}" th:unless="${#lists.isEmpty(note.childNotes)}">
         <!--                                <th:block th:each="childNote : ${note.childNotes}">-->
         <summary th:class="${note.noteId==targetNote.noteId || #lists.contains(note.childNotes, targetNote)} ? 'selected-item':''">
-            <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:text="${note.title}"></a>
+            <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:text="${note.title}" onclick="saveOpenList()"></a>
             <!--하위노트가 있는 상위노트 a링크-->
         </summary>
         <!--                                </th:block>-->
