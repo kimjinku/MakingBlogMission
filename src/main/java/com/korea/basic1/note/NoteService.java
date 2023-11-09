@@ -4,6 +4,8 @@ import com.korea.basic1.postService.Post;
 import com.korea.basic1.postService.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Not;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +27,11 @@ public class NoteService {
             throw new RuntimeException("question not found");
         }
     }
+    public List<Note> getParentNotePage(){
+        return noteRepository.findByParentNoteNoteId(null);
+    }
     public List<Note> getParentNoteList(){
         return noteRepository.findByParentNoteNoteId(null);
     }
+
 }

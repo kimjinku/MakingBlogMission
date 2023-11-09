@@ -35,13 +35,16 @@ public class PostController {
     UserService userService;
     @Autowired
     NoteService noteService;
+    @Autowired
+    PostService postService;
 
     @RequestMapping("/")
     public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
-        List<Post> postList = postRepository.findAll();
-        List<Note> noteList = noteService.getParentNoteList();
-        List<Post> postListForNote = noteList.get(0).getPosts();
         pageable = PageRequest.of(page, 10);
+        Page<Post> postList = postRepository.findAll(pageable);
+        List<Note> noteList = noteService.getParentNoteList();
+        //List<Post> postListForNote = noteList.get(0).getPosts();
+        Page<Post> postListForNote = postRepository.findAllByNote(noteList.get(0),pageable);
         if (keyword != null && !keyword.isEmpty()) {
             Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
             model.addAttribute("searchResults", searchResults);
@@ -52,7 +55,7 @@ public class PostController {
         model.addAttribute("searchNoteResults", searchNoteResults);
         model.addAttribute("keyword", keyword);
         model.addAttribute("postList", postListForNote);
-        model.addAttribute("targetPost", postList.get(0));
+        model.addAttribute("targetPost", postList.getContent().get(0));// postList.get(0);
         model.addAttribute("noteList", noteList);
         model.addAttribute("targetNote", noteList.get(0));
         model.addAttribute("parentNoteId", noteList.get(0).getNoteId());
@@ -76,10 +79,10 @@ public class PostController {
 
     @GetMapping("/detail/{noteId}/{postId}")
     public String detail(Model model, @PathVariable Long postId, @PathVariable Long noteId, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
+        pageable = PageRequest.of(page, 10);
         Post post = postRepository.findById(postId).get();
         Note note = noteRepository.findById(noteId).get();
-        pageable = PageRequest.of(page, 10);
-        List<Post> postListForNote = note.getPosts();
+        Page<Post> postListForNote = postRepository.findAllByNote(note,pageable);//note.getPosts(pageable);
         if (keyword != null && !keyword.isEmpty()) {
             Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
             model.addAttribute("searchResults", searchResults);
@@ -126,17 +129,18 @@ public class PostController {
 
     @GetMapping("/search")
     public String searchPosts(@RequestParam(value = "keyword", defaultValue = "") String keyword, Model model, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
-        List<Post> postList = postRepository.findAll();
-        List<Note> noteList = noteService.getParentNoteList();
         pageable = PageRequest.of(page, 10);
+        Page<Post> postList = postRepository.findAll(pageable);
+        List<Note> noteList = noteService.getParentNoteList();
         Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
         model.addAttribute("searchResults", searchResults);
         List<Note> searchNoteResults = noteRepository.findByPosts_TitleContainingOrPosts_ContentContaining(keyword, keyword);
         model.addAttribute("searchNoteResults", searchNoteResults);
-        List<Post> postListForNote = noteList.get(0).getPosts();
+        //List<Post> postListForNote = noteList.get(0).getPosts();
+        Page<Post> postListForNote = postRepository.findAllByNote(noteList.get(0),pageable);
         model.addAttribute("keyword", keyword);
         model.addAttribute("postList", postListForNote);
-        model.addAttribute("targetPost", postList.get(0));
+        model.addAttribute("targetPost", postList.getContent().get(0));// postList.get(0);
         model.addAttribute("noteList", noteList);
         model.addAttribute("targetNote", noteList.get(0));
         model.addAttribute("parentNoteId", noteList.get(0).getNoteId());

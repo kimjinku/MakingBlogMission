@@ -94,6 +94,30 @@
                         <input type="submit" value="추가">
                     </form>
                 </ul>
+                <!-- 페이징처리 시작 -->
+                <div th:if="${!postList.isEmpty()}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${!postList.hasPrevious} ? 'disabled'">
+                            <a class="page-link" th:if="${postList.number - 1 >= 0}"
+                               th:href="@{|?page=${postList.number-1}|}">
+                                <span>이전</span>
+                            </a>
+                        </li>
+                        <li th:each="page: ${#numbers.sequence(0, postList.totalPages-1)}"
+                            th:if="${page >= postList.number-5 and page <= postList.number+5}"
+                            th:classappend="${page == postList.number} ? 'active'"
+                            class="page-item">
+                            <a th:text="${page}" class="page-link" th:href="@{|?page=${page}|}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${!postList.hasNext} ? 'disabled'">
+                            <a class="page-link" th:if="${postList.number + 1 < postList.totalPages}"
+                               th:href="@{|?page=${postList.number+1}|}">
+                                <span>다음</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- 페이징처리 끝 -->
             </div>
         </div>
         <div class="content">
