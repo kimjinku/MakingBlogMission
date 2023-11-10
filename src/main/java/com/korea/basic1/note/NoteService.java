@@ -34,4 +34,12 @@ public class NoteService {
         return noteRepository.findByParentNoteNoteId(null);
     }
 
+    public List<Note> getNotCheckableNoteList(Note note,List<Note> notCheckableList) {
+        notCheckableList.add(note);
+        for(Note childNote:note.getChildNotes()){
+            getNotCheckableNoteList(childNote,notCheckableList);
+
+        }return notCheckableList;
+    }
+
 }

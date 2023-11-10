@@ -1,25 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-<li th:fragment="tree(targetNote,noteList)" th:each="note:${noteList}"  th:class="${note.noteId==targetNote.noteId and #lists.isEmpty(note.childNotes)} ? 'selected-item':''">
-    <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:if="${#lists.isEmpty(note.childNotes)}" th:text="${note.title}" onclick="saveOpenList()"></a>
+<li th:fragment="tree(targetNote, noteList)"
+    th:each="note:${noteList}"
+    th:with="noChild=${#lists.isEmpty(note.childNotes)},
+    hasChild=${!noChild},
+    onTarget=${note.noteId==targetNote.noteId}"
+    th:class="${onTarget and noChild} ? 'selected-item':''">
+    <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:if="${noChild}" th:text="${note.title}"
+       onclick="saveOpenList()"></a>
     <!--하위노트가 없는 상위노트  a링크-->
-    <details th:id="${note.noteId}" th:unless="${#lists.isEmpty(note.childNotes)}">
+    <details th:id="${note.noteId}" th:unless="${noChild}">
         <!--                                <th:block th:each="childNote : ${note.childNotes}">-->
-        <summary th:class="${note.noteId==targetNote.noteId || #lists.contains(note.childNotes, targetNote)} ? 'selected-item':''">
-            <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}" th:text="${note.title}" onclick="saveOpenList()"></a>
+        <summary th:class="${onTarget || #lists.contains(note.childNotes, targetNote)} ? 'selected-item':''">
+            <a th:href="@{|/noteDetail/${note.noteId}/${targetPost.postId}|}"
+               th:text="${note.title}" onclick="saveOpenList()"></a>
             <!--하위노트가 있는 상위노트 a링크-->
         </summary>
         <!--                                </th:block>-->
         <ul>
-            <li th:if="${#list.isEmpty(note.childNotes)}" th:replace="~{/fragments :: tree(${targetNote},${note.childNotes})}">
-                <ul>
-                    <li th:if="${#list.isEmpty(note.childNotes)}" th:replace="~{/fragments :: tree(${targetNote},${note.childNotes})}">
-                </ul>
+            <li th:if="${noChild}" th:replace="~{/fragments :: tree(${targetNote},${note.childNotes})}">
+            </li>
+        </ul>
+    </details>
+</li>
+
+
+<div th:fragment="tree-item(note,hasChild,checkable)">
+    <input th:if="${hasChild and checkable}" type="radio" name="destinationId" th:value="${note.noteId}">
+    <a th:text="${note.title}" onclick="saveOpenList()"></a>
+</div>
+
+
+
+
+<li th:fragment="move_tree(targetNote, noteList, notCheckableList)"
+    th:each="note:${noteList}"
+    th:with="noChild=${#lists.isEmpty(note.childNotes)},
+    hasChild=${!noChild},
+    onTarget=${note.noteId==targetNote.noteId},
+    checkable = ${!#lists.contains(notCheckableList, note)}"
+    th:class="${onTarget and noChild} ? 'selected-item':''">
+
+    <div th:replace="~{/fragments::tree-item(${note},${noChild},${checkable})}"></div>
+    <!--하위노트가 없는 상위노트  a링크-->
+    <details th:id="${'d'+note.noteId}" th:if="${hasChild}">
+        <!--                                <th:block th:each="childNote : ${note.childNotes}">-->
+        <summary th:class="${onTarget || #lists.contains(note.childNotes, targetNote)} ? 'selected-item':''">
+            <div th:replace="~{/fragments::tree-item(${note},${hasChild},${checkable})}"></div>
+            <!--하위노트가 있는 상위노트 a링크-->
+        </summary>
+        <!--                                </th:block>-->
+        <ul>
+            <li th:if="${noChild}"
+                th:replace="~{/fragments :: move_tree(${targetNote},${note.childNotes},${notCheckableList})}">
             </li>
         </ul>
     </details>

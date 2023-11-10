@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,10 +40,11 @@ public class PostController {
     PostService postService;
 
     @RequestMapping("/")
-    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
+    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword,@RequestParam(value = "noteId",defaultValue = "1") Long noteId, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
         pageable = PageRequest.of(page, 10);
         Page<Post> postList = postRepository.findAll(pageable);
         List<Note> noteList = noteService.getParentNoteList();
+        Note note = noteService.getNote(noteList.get(0).getNoteId());
         //List<Post> postListForNote = noteList.get(0).getPosts();
         Page<Post> postListForNote = postService.getPageListByCreateDate(page,noteList.get(0));
         if (keyword != null && !keyword.isEmpty()) {
@@ -59,6 +61,8 @@ public class PostController {
         model.addAttribute("noteList", noteList);
         model.addAttribute("targetNote", noteList.get(0));
         model.addAttribute("parentNoteId", noteList.get(0).getNoteId());
+        List<Note> notCheckableList= noteService.getNotCheckableNoteList(note,new ArrayList<>());
+        model.addAttribute("notCheckableList",notCheckableList);
         return "main";
     }
 
@@ -109,6 +113,8 @@ public class PostController {
         }
         List<Note> searchNoteResults = noteRepository.findByPosts_TitleContainingOrPosts_ContentContaining(keyword, keyword);
         model.addAttribute("searchNoteResults", searchNoteResults);
+        List<Note> notCheckableList= noteService.getNotCheckableNoteList(note,new ArrayList<>());
+        model.addAttribute("notCheckableList",notCheckableList);
         model.addAttribute("keyword", keyword);
         model.addAttribute("targetPost", post);
         model.addAttribute("postList", postListForNote);
@@ -146,10 +152,11 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public String searchPosts(@RequestParam(value = "keyword", defaultValue = "") String keyword, Model model, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
+    public String searchPosts(@RequestParam(value = "keyword", defaultValue = "") String keyword,@RequestParam(value = "noteId",defaultValue = "1") Long noteId, Model model, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
         pageable = PageRequest.of(page, 10);
         Page<Post> postList = postRepository.findAll(pageable);
         List<Note> noteList = noteService.getParentNoteList();
+        Note note = noteService.getNote(noteList.get(0).getNoteId());
         Page<Post> searchResults = postRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
         model.addAttribute("searchResults", searchResults);
         List<Note> searchNoteResults = noteRepository.findByPosts_TitleContainingOrPosts_ContentContaining(keyword, keyword);
@@ -162,6 +169,8 @@ public class PostController {
         model.addAttribute("noteList", noteList);
         model.addAttribute("targetNote", noteList.get(0));
         model.addAttribute("parentNoteId", noteList.get(0).getNoteId());
+        List<Note> notCheckableList= noteService.getNotCheckableNoteList(note,new ArrayList<>());
+        model.addAttribute("notCheckableList",notCheckableList);
 
         return "main";
     }

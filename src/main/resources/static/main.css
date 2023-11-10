@@ -31,7 +31,7 @@ a{
     height:800px;
 }
 .content{
-    background:lightgray;
+    background:skyblue;
     width:65%;
     height:800px;
 }
@@ -67,4 +67,5 @@ a{
 .note-tree{
     height:80%;
     border:1px solid black;
+    overflow:auto;
 }

@@ -24,7 +24,7 @@ public class Note {
     @ManyToOne
     private Note parentNote;
 
-    @OneToMany(mappedBy = "parentNote")  // 자식 노트 목록을 가리킴
+    @OneToMany(mappedBy = "parentNote", cascade = CascadeType.ALL)  // 자식 노트 목록을 가리킴
     private List<Note> childNotes;
 
 }

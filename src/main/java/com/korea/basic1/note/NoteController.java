@@ -36,10 +36,11 @@ public class NoteController {
     PostService postService;
 
     @RequestMapping("/note")
-    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
+    public String main(Model model, @RequestParam(value = "keyword", defaultValue = "") String keyword,@RequestParam(value = "noteId",defaultValue = "1") Long noteId, Pageable pageable, @RequestParam(value = "page", defaultValue = "0") int page) {
         pageable = PageRequest.of(page, 10);
         Page<Post> postList = postRepository.findAll(pageable);
         List<Note> noteList = noteService.getParentNoteList();
+        Note note = noteService.getNote(noteList.get(0).getNoteId());
         //List<Post> postListForNote = noteList.get(0).getPosts();
         Page<Post> postListForNote = postService.getPageListByCreateDate(page,noteList.get(0));
         if (keyword != null && !keyword.isEmpty()) {
@@ -49,6 +50,8 @@ public class NoteController {
             model.addAttribute("searchResults", Collections.emptyList()); // 빈 결과를 전달
         }
         List<Note> searchNoteResults = noteRepository.findByPosts_TitleContainingOrPosts_ContentContaining(keyword, keyword);
+        List<Note> notCheckableList= noteService.getNotCheckableNoteList(note,new ArrayList<>());
+        model.addAttribute("notCheckableList",notCheckableList);
         model.addAttribute("searchNoteResults", searchNoteResults);
         model.addAttribute("keyword", keyword);
         model.addAttribute("postList", postListForNote);
@@ -93,6 +96,8 @@ public class NoteController {
         model.addAttribute("postList", postListForNote);
         model.addAttribute("noteList", noteService.getParentNoteList());
         model.addAttribute("targetNote", note);
+        List<Note> notCheckableList= noteService.getNotCheckableNoteList(note,new ArrayList<>());
+        model.addAttribute("notCheckableList",notCheckableList);
         if (note.getParentNote() != null) {
             model.addAttribute("parentNoteId", note.getParentNote().getNoteId());
         } else {
