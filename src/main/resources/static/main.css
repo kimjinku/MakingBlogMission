@@ -55,7 +55,16 @@ a{
 .page-list ul.pagination {
     display: inline-block;
 }
-.page-list ul.pagination li{
+
+.page-list ul.pagination li {
     display: inline;
     margin-right: 1px; /* 숫자와 버튼 사이 여백 조절 */
+}
+.modal-box{
+    height:70%;
+
+}
+.note-tree{
+    height:80%;
+    border:1px solid black;
 }
